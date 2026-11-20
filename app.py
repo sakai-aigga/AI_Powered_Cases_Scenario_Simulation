@@ -1,13 +1,21 @@
-from flask import Flask
+import sys
+from app import create_app
+from app.models import db, User
 
-# Initialize the Flask application instance
-app = Flask(__name__)
+app = create_app()
 
-# Define the default root route
-@app.route("/")
-def hello_world():
-    return "<h1>Hello, World!</h1>"
 
-# Run the development server if the script is executed directly
+@app.cli.command("init-db")
+def init_db():
+    with app.app_context():
+        db.create_all()
+        print("PostgreSQL tables created successfully.")
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    if "--init-db" in sys.argv:
+        with app.app_context():
+            db.create_all()
+            print("PostgreSQL tables created successfully.")
+    else:
+        app.run(debug=True, port=5000)
