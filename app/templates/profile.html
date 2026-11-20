@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Profile Settings &mdash; Case Simulation Platform</title>
+</head>
+<body class="dashboard-body">
+    <!-- Main Top Navigation -->
+    <header class="navbar">
+        <div class="nav-content">
+            <div class="brand">
+                <a href="{{ url_for('admin.dashboard') if user.role == 'admin' else url_for('auth.dashboard') }}">Case Simulation Platform</a>
+            </div>
+            <div class="user-menu">
+                <span class="user-name">{{ user.full_name or user.email }}</span>
+                <span class="role-pill role-{{ user.role }}">{{ user.role|capitalize }}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container Layout with Right-Side Nav Bar -->
+    <div class="layout-with-right-nav">
+        <!-- Main Content Flow -->
+        <main class="main-content-flow">
+            <div class="page-title-row">
+                <div>
+                    <h1>Profile &amp; Account Settings</h1>
+                    <p class="text-muted">Manage your personal details, assigned email address, and account password.</p>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="alerts">
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <div class="dashboard-grid">
+                <!-- Panel 1: Personal Details -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Personal Information</h2>
+                        <p class="text-muted" style="margin-top: 4px;">Update your displayed name and assigned email address.</p>
+                    </div>
+                    <div class="panel-body">
+                        <form action="{{ url_for('auth.update_profile_info') }}" method="POST" class="auth-form" style="margin-top: 8px;">
+                            <div class="form-group">
+                                <label for="full_name">Full Name</label>
+                                <input type="text" id="full_name" name="full_name" value="{{ user.full_name }}" maxlength="120" required autocomplete="name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Assigned Email Address</label>
+                                <input type="email" id="email" name="email" value="{{ user.email }}" maxlength="150" required autocomplete="email">
+                            </div>
+
+                            <div class="form-row-2" style="margin-top: 4px;">
+                                <div class="form-group">
+                                    <label>Account Role</label>
+                                    <div style="padding: 8px 0;">
+                                        <span class="role-pill role-{{ user.role }}">{{ user.role|capitalize }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Member Since</label>
+                                    <div style="padding: 8px 0; font-size: 14px; color: #64748b;">
+                                        {{ user.created_at.strftime('%B %d, %Y') if user.created_at else '-' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 20px; margin-top: 12px;">Save Profile Changes</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Change Password -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Change Password</h2>
+                        <p class="text-muted" style="margin-top: 4px;">Ensure your account is protected with a secure password.</p>
+                    </div>
+                    <div class="panel-body">
+                        <form action="{{ url_for('auth.change_password') }}" method="POST" class="auth-form" style="margin-top: 8px;">
+                            <div class="form-group">
+                                <label for="current_password">Current Password</label>
+                                <input type="password" id="current_password" name="current_password" placeholder="Enter current password" required autocomplete="current-password">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new_password">New Password</label>
+                                <input type="password" id="new_password" name="new_password" placeholder="Minimum 6 characters" minlength="6" required autocomplete="new-password">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm New Password</label>
+                                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter new password" minlength="6" required autocomplete="new-password">
+                            </div>
+
+                            <button type="submit" class="btn btn-secondary" style="width: auto; padding: 10px 20px; margin-top: 12px;">Update Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right-Side Navigation Bar -->
+        <aside class="right-nav-sidebar">
+            <div class="sidebar-user-card">
+                <div class="sidebar-avatar">{{ (user.full_name or 'U')[0]|upper }}</div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-name">{{ user.full_name or user.email }}</span>
+                    <span class="role-pill role-{{ user.role }}">{{ user.role|capitalize }}</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="sidebar-section-title">NAVIGATION</div>
+                {% if user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+                        <span class="sidebar-icon">&bull;</span> Admin Console
+                    </a>
+                    <a href="{{ url_for('admin.dashboard') }}#users-section" class="sidebar-link">
+                        <span class="sidebar-icon">&bull;</span> User Management
+                    </a>
+                    <a href="{{ url_for('admin.dashboard') }}#llm-section" class="sidebar-link">
+                        <span class="sidebar-icon">&bull;</span> LLM Configurations
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                        <span class="sidebar-icon">&bull;</span> Dashboard Home
+                    </a>
+                {% endif %}
+
+                <div class="sidebar-section-title" style="margin-top: 18px;">ACCOUNT</div>
+                <a href="{{ url_for('auth.profile') }}" class="sidebar-link active">
+                    <span class="sidebar-icon">&bull;</span> Profile Settings
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+                    <span class="sidebar-icon">&bull;</span> Sign Out
+                </a>
+            </nav>
+        </aside>
+    </div>
+</body>
+</html>
