@@ -12,18 +12,22 @@
         <div class="nav-content">
             <div class="brand">
                 <a href="{{ url_for('admin.dashboard') }}">Case Simulation Platform</a>
-                <span class="role-pill role-admin" style="margin-left: 8px;">Admin Console</span>
+                <span class="brand-divider">/</span>
+                <span class="brand-context">Admin Console</span>
             </div>
             <div class="user-menu">
                 <span class="user-name">{{ user.full_name or user.email }}</span>
-                <span class="role-pill role-admin">Admin</span>
+                <span class="user-role-label">(Admin)</span>
             </div>
         </div>
     </header>
 
-    <!-- Main Container Layout with Right-Side Nav Bar -->
-    <div class="layout-with-right-nav">
-        <!-- Center/Left Main Content Flow -->
+    <!-- Main Container Layout with Left-Side Nav Bar -->
+    <div class="layout-with-sidebar">
+        <!-- Reusable Left-Side Navigation Bar Component -->
+        {% include 'nav_bar.html' %}
+
+        <!-- Main Content Area -->
         <main class="main-content-flow">
             <div class="page-title-row">
                 <div>
@@ -101,9 +105,9 @@
                                     </td>
                                     <td>
                                         {% if u.is_active %}
-                                            <span class="badge-status badge-active">Active</span>
+                                            <span class="status-indicator status-active">&bull; Active</span>
                                         {% else %}
-                                            <span class="badge-status badge-inactive">Deactivated</span>
+                                            <span class="status-indicator status-inactive">&bull; Deactivated</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '-' }}</td>
@@ -214,38 +218,6 @@
                 </div>
             </section>
         </main>
-
-        <!-- Right-Side Navigation Bar -->
-        <aside class="right-nav-sidebar">
-            <div class="sidebar-user-card">
-                <div class="sidebar-avatar">{{ (user.full_name or 'A')[0]|upper }}</div>
-                <div class="sidebar-user-info">
-                    <span class="sidebar-name">{{ user.full_name or 'Administrator' }}</span>
-                    <span class="role-pill role-admin">Administrator</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <div class="sidebar-section-title">ADMIN CONTROLS</div>
-                <a href="#stats-section" class="sidebar-link">
-                    <span class="sidebar-icon">&bull;</span> Platform Overview
-                </a>
-                <a href="#users-section" class="sidebar-link">
-                    <span class="sidebar-icon">&bull;</span> User Management
-                </a>
-                <a href="#llm-section" class="sidebar-link">
-                    <span class="sidebar-icon">&bull;</span> LLM Configurations
-                </a>
-
-                <div class="sidebar-section-title" style="margin-top: 18px;">ACCOUNT</div>
-                <a href="{{ url_for('auth.profile') }}" class="sidebar-link">
-                    <span class="sidebar-icon">&bull;</span> Profile Settings
-                </a>
-                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
-                    <span class="sidebar-icon">&bull;</span> Sign Out
-                </a>
-            </nav>
-        </aside>
     </div>
 </body>
 </html>
