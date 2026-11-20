@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Admin Console &mdash; Case Simulation Platform</title>
+</head>
+<body class="dashboard-body">
+    <!-- Main Top Navigation -->
+    <header class="navbar">
+        <div class="nav-content">
+            <div class="brand">
+                <a href="{{ url_for('admin.dashboard') }}">Case Simulation Platform</a>
+                <span class="role-pill role-admin" style="margin-left: 8px;">Admin Console</span>
+            </div>
+            <div class="user-menu">
+                <span class="user-name">{{ user.full_name or user.email }}</span>
+                <span class="role-pill role-admin">Admin</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container Layout with Right-Side Nav Bar -->
+    <div class="layout-with-right-nav">
+        <!-- Center/Left Main Content Flow -->
+        <main class="main-content-flow">
+            <div class="page-title-row">
+                <div>
+                    <h1>Platform Administration</h1>
+                    <p class="text-muted">Manage system users, oversee platform accounts, and configure external LLM API providers.</p>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="alerts">
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <!-- Section: Platform Metrics -->
+            <section id="stats-section" class="admin-metrics-grid">
+                <div class="admin-metric-card">
+                    <span class="metric-num">{{ stats.total_users }}</span>
+                    <span class="metric-lbl">Total Users</span>
+                </div>
+                <div class="admin-metric-card">
+                    <span class="metric-num">{{ stats.students }}</span>
+                    <span class="metric-lbl">Students</span>
+                </div>
+                <div class="admin-metric-card">
+                    <span class="metric-num">{{ stats.teachers }}</span>
+                    <span class="metric-lbl">Instructors</span>
+                </div>
+                <div class="admin-metric-card">
+                    <span class="metric-num">{{ stats.admins }}</span>
+                    <span class="metric-lbl">Administrators</span>
+                </div>
+                <div class="admin-metric-card">
+                    <span class="metric-num">{{ stats.active_users }}</span>
+                    <span class="metric-lbl">Active Accounts</span>
+                </div>
+            </section>
+
+            <!-- Section 1: User Management -->
+            <section id="users-section" class="admin-section" style="margin-top: 24px;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>User Account Management</h2>
+                        <p class="text-muted" style="margin-top: 4px;">Directly query, modify roles, toggle access status, and manage platform users.</p>
+                    </div>
+                    <div class="panel-body" style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Current Role</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in users %}
+                                <tr>
+                                    <td><strong>{{ u.full_name }}</strong></td>
+                                    <td>{{ u.email }}</td>
+                                    <td>
+                                        <form action="{{ url_for('admin.update_user_role', user_id=u.user_id) }}" method="POST" class="inline-form">
+                                            <select name="role" class="form-select-sm" onchange="this.form.submit()">
+                                                <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
+                                                <option value="teacher" {% if u.role == 'teacher' %}selected{% endif %}>Teacher</option>
+                                                <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        {% if u.is_active %}
+                                            <span class="badge-status badge-active">Active</span>
+                                        {% else %}
+                                            <span class="badge-status badge-inactive">Deactivated</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '-' }}</td>
+                                    <td>
+                                        <div class="actions-cell">
+                                            <!-- Toggle Status Form -->
+                                            <form action="{{ url_for('admin.toggle_user_status', user_id=u.user_id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn-action {% if u.is_active %}btn-warn{% else %}btn-activate{% endif %}">
+                                                    {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                                                </button>
+                                            </form>
+
+                                            <!-- Delete User Form -->
+                                            <form action="{{ url_for('admin.delete_user', user_id=u.user_id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to permanently delete user {{ u.full_name }}?');">
+                                                <button type="submit" class="btn-action btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: LLM Configuration Panel (pp.txt Section 4.4, Section 5) -->
+            <section id="llm-section" class="admin-section" style="margin-top: 24px;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>AI Layer &amp; LLM Configurations</h2>
+                        <p class="text-muted" style="margin-top: 4px;">Configure primary and fallback LLM API providers (Gemini &amp; Groq) for cost routing and persona reliability.</p>
+                    </div>
+                    <div class="panel-body">
+                        <form action="{{ url_for('admin.update_llm_config') }}" method="POST" class="admin-form">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="active_provider">Primary Active Provider</label>
+                                    <select id="active_provider" name="active_provider" class="form-control">
+                                        <option value="gemini" {% if llm_config and llm_config.active_provider == 'gemini' %}selected{% endif %}>Gemini API (Google)</option>
+                                        <option value="groq" {% if llm_config and llm_config.active_provider == 'groq' %}selected{% endif %}>Groq API (High Speed)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="fallback_provider">Secondary Fallback Provider</label>
+                                    <select id="fallback_provider" name="fallback_provider" class="form-control">
+                                        <option value="groq" {% if llm_config and llm_config.fallback_provider == 'groq' %}selected{% endif %}>Groq API</option>
+                                        <option value="gemini" {% if llm_config and llm_config.fallback_provider == 'gemini' %}selected{% endif %}>Gemini API</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" name="fallback_enabled" value="true" {% if not llm_config or llm_config.fallback_enabled %}checked{% endif %}>
+                                    <span>Enable automatic fallback routing between providers upon failure or rate limit</span>
+                                </label>
+                            </div>
+
+                            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+                            <div class="form-row-2">
+                                <!-- Gemini Section -->
+                                <div class="provider-box">
+                                    <h3 style="font-size: 15px; margin-bottom: 12px; color: #1e293b;">Gemini API Configuration</h3>
+                                    <div class="form-group">
+                                        <label for="gemini_api_key">Gemini API Key</label>
+                                        <input type="password" id="gemini_api_key" name="gemini_api_key" class="form-control" value="{{ llm_config.gemini_api_key if llm_config else '' }}" placeholder="AIzaSy...">
+                                    </div>
+                                    <div class="form-group" style="margin-top: 10px;">
+                                        <label for="gemini_model">Gemini Model</label>
+                                        <input type="text" id="gemini_model" name="gemini_model" class="form-control" value="{{ llm_config.gemini_model if llm_config else 'gemini-1.5-flash' }}">
+                                    </div>
+                                </div>
+
+                                <!-- Groq Section -->
+                                <div class="provider-box">
+                                    <h3 style="font-size: 15px; margin-bottom: 12px; color: #1e293b;">Groq API Configuration</h3>
+                                    <div class="form-group">
+                                        <label for="groq_api_key">Groq API Key</label>
+                                        <input type="password" id="groq_api_key" name="groq_api_key" class="form-control" value="{{ llm_config.groq_api_key if llm_config else '' }}" placeholder="gsk_...">
+                                    </div>
+                                    <div class="form-group" style="margin-top: 10px;">
+                                        <label for="groq_model">Groq Model</label>
+                                        <input type="text" id="groq_model" name="groq_model" class="form-control" value="{{ llm_config.groq_model if llm_config else 'llama-3.3-70b-versatile' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row-2" style="margin-top: 16px;">
+                                <div class="form-group">
+                                    <label for="temperature">Sampling Temperature (0.0 - 1.0)</label>
+                                    <input type="number" id="temperature" name="temperature" class="form-control" step="0.05" min="0.0" max="1.0" value="{{ llm_config.temperature if llm_config else 0.70 }}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="max_tokens">Max Generation Tokens</label>
+                                    <input type="number" id="max_tokens" name="max_tokens" class="form-control" step="64" min="128" max="4096" value="{{ llm_config.max_tokens if llm_config else 1024 }}">
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 20px;">
+                                <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 24px;">Save LLM Settings</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Right-Side Navigation Bar -->
+        <aside class="right-nav-sidebar">
+            <div class="sidebar-user-card">
+                <div class="sidebar-avatar">{{ (user.full_name or 'A')[0]|upper }}</div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-name">{{ user.full_name or 'Administrator' }}</span>
+                    <span class="role-pill role-admin">Administrator</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="sidebar-section-title">ADMIN CONTROLS</div>
+                <a href="#stats-section" class="sidebar-link">
+                    <span class="sidebar-icon">&bull;</span> Platform Overview
+                </a>
+                <a href="#users-section" class="sidebar-link">
+                    <span class="sidebar-icon">&bull;</span> User Management
+                </a>
+                <a href="#llm-section" class="sidebar-link">
+                    <span class="sidebar-icon">&bull;</span> LLM Configurations
+                </a>
+
+                <div class="sidebar-section-title" style="margin-top: 18px;">ACCOUNT</div>
+                <a href="{{ url_for('auth.profile') }}" class="sidebar-link">
+                    <span class="sidebar-icon">&bull;</span> Profile Settings
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+                    <span class="sidebar-icon">&bull;</span> Sign Out
+                </a>
+            </nav>
+        </aside>
+    </div>
+</body>
+</html>
