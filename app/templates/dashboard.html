@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Dashboard &mdash; Case Simulation Platform</title>
+</head>
+<body class="dashboard-body">
+    <!-- Main Top Navigation -->
+    <header class="navbar">
+        <div class="nav-content">
+            <div class="brand">
+                <a href="{{ url_for('auth.dashboard') }}">Case Simulation Platform</a>
+            </div>
+            <div class="user-menu">
+                <span class="user-name">{{ user.full_name or user.email }}</span>
+                <span class="role-pill">{{ user.role|capitalize }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn-link">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-container">
+        <div class="page-title-row">
+            <div>
+                <h1>Dashboard</h1>
+                <p class="text-muted">Welcome back, {{ user.full_name or user.email }}. Here is an overview of your activity.</p>
+            </div>
+        </div>
+
+        {% if user.role == 'teacher' %}
+        <!-- Teacher View -->
+        <div class="dashboard-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Case Scenarios</h2>
+                </div>
+                <div class="panel-body">
+                    <p>Create and edit roleplay case scenarios, configure milestone states, and define evaluation rubrics.</p>
+                    <div class="button-group">
+                        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-primary">New Scenario</a>
+                        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-secondary">Manage Scenarios</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Student Submissions</h2>
+                </div>
+                <div class="panel-body">
+                    <p>Review completed student roleplay transcripts, decision paths, and evaluation scores.</p>
+                    <div class="button-group">
+                        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-secondary">View Results</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Student View -->
+        <div class="dashboard-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Active Simulations</h2>
+                </div>
+                <div class="panel-body">
+                    <p>Engage in realistic case studies, make strategic choices, and navigate challenging scenarios.</p>
+                    <div class="button-group">
+                        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-primary">Start Simulation</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>My Performance History</h2>
+                </div>
+                <div class="panel-body">
+                    <p>View your previous simulation transcripts, choices made, and rubric evaluations.</p>
+                    <div class="button-group">
+                        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-secondary">Past Sessions</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+</body>
+</html>
