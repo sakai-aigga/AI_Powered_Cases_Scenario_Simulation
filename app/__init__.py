@@ -26,16 +26,14 @@ def create_app():
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    # Initialize extensions
     db.init_app(app)
 
-    # Auto-create tables in PostgreSQL on startup
-    with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            app.logger.warning(f"Database table initialization deferred: {e}")
-
+    # Register blueprints
     from app.auth import auth_bp
+    from app.admin import admin_bp
+
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
 
     return app
