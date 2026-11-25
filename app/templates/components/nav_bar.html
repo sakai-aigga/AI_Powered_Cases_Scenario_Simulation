@@ -2,6 +2,19 @@
     <div class="sidebar-user-block">
         <div class="sidebar-name">{{ user.full_name or user.email }}</div>
         <div class="sidebar-role">{{ user.role|capitalize }}</div>
+        <div class="sidebar-status-indicator">
+            {% if user.is_active == 'Active' %}
+                <span class="status-indicator status-active">&bull; Active</span>
+            {% elif user.is_active == 'Away' %}
+                <span class="status-indicator status-away">&bull; Away</span>
+            {% elif user.is_active == 'Busy' %}
+                <span class="status-indicator status-busy">&bull; Busy</span>
+            {% elif user.is_active == 'Invisible' %}
+                <span class="status-indicator status-muted">&bull; Invisible</span>
+            {% else %}
+                <span class="status-indicator status-inactive">&bull; Inactive</span>
+            {% endif %}
+        </div>
     </div>
 
     <nav class="sidebar-menu">

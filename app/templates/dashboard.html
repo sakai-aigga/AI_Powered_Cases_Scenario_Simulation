@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Dashboard &mdash; Case Simulation Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Dashboard</title>
 </head>
 <body class="dashboard-body">
     <!-- Main Top Navigation -->
@@ -23,7 +23,7 @@
     <!-- Main Container Layout with Left-Side Nav Bar -->
     <div class="layout-with-sidebar">
         <!-- Reusable Left-Side Navigation Bar Component -->
-        {% include 'nav_bar.html' %}
+        {% include 'components/nav_bar.html' %}
 
         <!-- Main Content Area -->
         <main class="main-content-flow">

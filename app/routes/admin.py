@@ -39,7 +39,7 @@ def dashboard():
     student_count = sum(1 for u in users if u.role == "student")
     teacher_count = sum(1 for u in users if u.role == "teacher")
     admin_count = sum(1 for u in users if u.role == "admin")
-    active_count = sum(1 for u in users if u.is_active)
+    active_count = sum(1 for u in users if u.is_active in ("Active", "Away", "Busy"))
 
     stats = {
         "total_users": total_users,
@@ -50,7 +50,7 @@ def dashboard():
     }
 
     return render_template(
-        "admin_dashboard.html",
+        "admin/admin_dashboard.html",
         user=session.get("user"),
         users=users,
         llm_config=llm_config,
@@ -61,7 +61,7 @@ def dashboard():
 @admin_bp.route("/user/<uuid:user_id>/update-role", methods=["POST"])
 @admin_required
 def update_user_role(user_id):
-    """Updates a user's role via direct query."""
+    """Updates a user's role via direct query. Admins cannot have their role changed."""
     new_role = request.form.get("role", "").strip().lower()
     if new_role not in ("student", "teacher", "admin"):
         flash("Invalid role specified.", "error")
@@ -70,6 +70,16 @@ def update_user_role(user_id):
     user = db.session.get(User, user_id)
     if not user:
         flash("User not found.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    # Administrator roles cannot be changed
+    if user.role == "admin":
+        flash("Administrator roles are protected and cannot be changed.", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    current_admin_id = session.get("user", {}).get("user_id")
+    if str(user.user_id) == str(current_admin_id):
+        flash("You cannot change your own administrative role.", "error")
         return redirect(url_for("admin.dashboard"))
 
     user.role = new_role
@@ -82,7 +92,7 @@ def update_user_role(user_id):
 @admin_bp.route("/user/<uuid:user_id>/toggle-status", methods=["POST"])
 @admin_required
 def toggle_user_status(user_id):
-    """Toggles account active status (is_active) via direct query."""
+    """Toggles user status between Active and Inactive via direct query."""
     user = db.session.get(User, user_id)
     if not user:
         flash("User not found.", "error")
@@ -91,14 +101,17 @@ def toggle_user_status(user_id):
     # Prevent admin from deactivating their own currently logged-in account
     current_admin_id = session.get("user", {}).get("user_id")
     if str(user.user_id) == str(current_admin_id):
-        flash("You cannot deactivate your own administrative account.", "error")
+        flash("Please update your personal status through Profile Settings.", "info")
         return redirect(url_for("admin.dashboard"))
 
-    user.is_active = not user.is_active
+    if user.is_active in ("Active", "Away", "Busy"):
+        user.is_active = "Inactive"
+    else:
+        user.is_active = "Active"
+
     db.session.commit()
 
-    status_str = "activated" if user.is_active else "deactivated"
-    flash(f"Account for {user.full_name} has been {status_str}.", "info")
+    flash(f"Status for {user.full_name} set to {user.is_active}.", "info")
     return redirect(url_for("admin.dashboard"))
 
 

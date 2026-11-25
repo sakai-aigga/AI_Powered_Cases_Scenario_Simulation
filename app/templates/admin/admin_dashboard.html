@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Admin Console &mdash; Case Simulation Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Admin Console</title>
 </head>
 <body class="dashboard-body">
-    <!-- Main Top Navigation -->
     <header class="navbar">
         <div class="nav-content">
             <div class="brand">
@@ -22,12 +21,8 @@
         </div>
     </header>
 
-    <!-- Main Container Layout with Left-Side Nav Bar -->
     <div class="layout-with-sidebar">
-        <!-- Reusable Left-Side Navigation Bar Component -->
-        {% include 'nav_bar.html' %}
-
-        <!-- Main Content Area -->
+        {% include 'components/nav_bar.html' %}
         <main class="main-content-flow">
             <div class="page-title-row">
                 <div>
@@ -46,7 +41,6 @@
               {% endif %}
             {% endwith %}
 
-            <!-- Section: Platform Metrics -->
             <section id="stats-section" class="admin-metrics-grid">
                 <div class="admin-metric-card">
                     <span class="metric-num">{{ stats.total_users }}</span>
@@ -70,7 +64,6 @@
                 </div>
             </section>
 
-            <!-- Section 1: User Management -->
             <section id="users-section" class="admin-section" style="margin-top: 24px;">
                 <div class="panel">
                     <div class="panel-header">
@@ -95,32 +88,39 @@
                                     <td><strong>{{ u.full_name }}</strong></td>
                                     <td>{{ u.email }}</td>
                                     <td>
-                                        <form action="{{ url_for('admin.update_user_role', user_id=u.user_id) }}" method="POST" class="inline-form">
-                                            <select name="role" class="form-select-sm" onchange="this.form.submit()">
-                                                <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
-                                                <option value="teacher" {% if u.role == 'teacher' %}selected{% endif %}>Teacher</option>
-                                                <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
-                                            </select>
-                                        </form>
+                                        {% if u.role == 'admin' %}
+                                            <span style="font-weight: 600; color: #1e293b;">Admin</span>
+                                        {% else %}
+                                            <form action="{{ url_for('admin.update_user_role', user_id=u.user_id) }}" method="POST" class="inline-form">
+                                                <select name="role" class="form-select-sm" onchange="this.form.submit()">
+                                                    <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
+                                                    <option value="teacher" {% if u.role == 'teacher' %}selected{% endif %}>Teacher</option>
+                                                </select>
+                                            </form>
+                                        {% endif %}
                                     </td>
                                     <td>
-                                        {% if u.is_active %}
+                                        {% if u.is_active == 'Active' %}
                                             <span class="status-indicator status-active">&bull; Active</span>
+                                        {% elif u.is_active == 'Away' %}
+                                            <span class="status-indicator status-away">&bull; Away</span>
+                                        {% elif u.is_active == 'Busy' %}
+                                            <span class="status-indicator status-busy">&bull; Busy</span>
+                                        {% elif u.is_active == 'Invisible' %}
+                                            <span class="status-indicator status-muted">&bull; Invisible (Privacy)</span>
                                         {% else %}
-                                            <span class="status-indicator status-inactive">&bull; Deactivated</span>
+                                            <span class="status-indicator status-inactive">&bull; Inactive</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '-' }}</td>
                                     <td>
                                         <div class="actions-cell">
-                                            <!-- Toggle Status Form -->
                                             <form action="{{ url_for('admin.toggle_user_status', user_id=u.user_id) }}" method="POST" style="display:inline;">
-                                                <button type="submit" class="btn-action {% if u.is_active %}btn-warn{% else %}btn-activate{% endif %}">
-                                                    {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                                                <button type="submit" class="btn-action {% if u.is_active in ('Active', 'Away', 'Busy') %}btn-warn{% else %}btn-activate{% endif %}">
+                                                    {% if u.is_active in ('Active', 'Away', 'Busy') %}Set Inactive{% else %}Set Active{% endif %}
                                                 </button>
                                             </form>
 
-                                            <!-- Delete User Form -->
                                             <form action="{{ url_for('admin.delete_user', user_id=u.user_id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to permanently delete user {{ u.full_name }}?');">
                                                 <button type="submit" class="btn-action btn-danger">Delete</button>
                                             </form>
@@ -134,8 +134,7 @@
                 </div>
             </section>
 
-            <!-- Section 2: LLM Configuration Panel (pp.txt Section 4.4, Section 5) -->
-            <section id="llm-section" class="admin-section" style="margin-top: 24px;">
+            <!-- <section id="llm-section" class="admin-section" style="margin-top: 24px;">
                 <div class="panel">
                     <div class="panel-header">
                         <h2>AI Layer &amp; LLM Configurations</h2>
@@ -171,7 +170,6 @@
                             <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
 
                             <div class="form-row-2">
-                                <!-- Gemini Section -->
                                 <div class="provider-box">
                                     <h3 style="font-size: 15px; margin-bottom: 12px; color: #1e293b;">Gemini API Configuration</h3>
                                     <div class="form-group">
@@ -184,7 +182,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Groq Section -->
                                 <div class="provider-box">
                                     <h3 style="font-size: 15px; margin-bottom: 12px; color: #1e293b;">Groq API Configuration</h3>
                                     <div class="form-group">
@@ -216,7 +213,7 @@
                         </form>
                     </div>
                 </div>
-            </section>
+            </section> -->
         </main>
     </div>
 </body>

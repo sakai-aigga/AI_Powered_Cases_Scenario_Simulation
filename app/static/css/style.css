@@ -1,4 +1,3 @@
-/* Case Study Simulation Platform Styles */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -394,6 +393,25 @@ body {
 
 .status-inactive {
     color: #b91c1c;
+}
+
+.status-away {
+    color: #d97706;
+}
+
+.status-busy {
+    color: #dc2626;
+}
+
+.status-muted {
+    color: #64748b;
+}
+
+.sidebar-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 3px;
+    font-size: 12px;
 }
 
 .form-select-sm {

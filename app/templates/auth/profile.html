@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Profile Settings &mdash; Case Simulation Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Profile Settings</title>
 </head>
 <body class="dashboard-body">
     <!-- Main Top Navigation -->
@@ -25,7 +25,7 @@
     <!-- Main Container Layout with Left-Side Nav Bar -->
     <div class="layout-with-sidebar">
         <!-- Reusable Left-Side Navigation Bar Component -->
-        {% include 'nav_bar.html' %}
+        {% include 'components/nav_bar.html' %}
 
         <!-- Main Content Flow -->
         <main class="main-content-flow">
@@ -112,6 +112,49 @@
                             <button type="submit" class="btn btn-secondary" style="width: auto; padding: 10px 20px; margin-top: 12px;">Update Password</button>
                         </form>
                     </div>
+                </div>
+            </div>
+
+            <!-- Panel 3: Activity & Privacy Status -->
+            <div class="panel" style="margin-top: 20px;">
+                <div class="panel-header">
+                    <h2>Activity &amp; Privacy Status</h2>
+                    <p class="text-muted" style="margin-top: 4px;">Update how your activity is tracked across the platform and manage your privacy mode.</p>
+                </div>
+                <div class="panel-body">
+                    <form action="{{ url_for('auth.update_status') }}" method="POST" class="auth-form" style="margin-top: 8px;">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="status">Presence &amp; Privacy Mode</label>
+                                <select id="status" name="status" class="form-control">
+                                    <option value="Active" {% if user.is_active == 'Active' %}selected{% endif %}>Active (Online &amp; Available)</option>
+                                    <option value="Away" {% if user.is_active == 'Away' %}selected{% endif %}>Away</option>
+                                    <option value="Busy" {% if user.is_active == 'Busy' %}selected{% endif %}>Busy (Do Not Disturb)</option>
+                                    <option value="Invisible" {% if user.is_active == 'Invisible' %}selected{% endif %}>Invisible (Privacy Mode &mdash; Appear Offline)</option>
+                                    <option value="Inactive" {% if user.is_active == 'Inactive' %}selected{% endif %}>Inactive (Offline)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Current Mode</label>
+                                <div style="padding: 8px 0;">
+                                    {% if user.is_active == 'Active' %}
+                                        <span class="status-indicator status-active">&bull; Active (Online)</span>
+                                    {% elif user.is_active == 'Away' %}
+                                        <span class="status-indicator status-away">&bull; Away</span>
+                                    {% elif user.is_active == 'Busy' %}
+                                        <span class="status-indicator status-busy">&bull; Busy</span>
+                                    {% elif user.is_active == 'Invisible' %}
+                                        <span class="status-indicator status-muted">&bull; Invisible (Privacy)</span>
+                                    {% else %}
+                                        <span class="status-indicator status-inactive">&bull; Inactive (Offline)</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 20px; margin-top: 12px;">Save Status</button>
+                    </form>
                 </div>
             </div>
         </main>
