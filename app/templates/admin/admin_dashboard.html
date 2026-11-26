@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Admin Console</title>
-</head>
-<body class="dashboard-body">
+{% extends 'base.html' %}
+
+{% block head %}
+<title>User Management - Admin Console</title>
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-body">
     <header class="navbar">
         <div class="nav-content">
             <div class="brand">
@@ -26,19 +25,19 @@
         <main class="main-content-flow">
             <div class="page-title-row">
                 <div>
-                    <h1>Platform Administration</h1>
-                    <p class="text-muted">Manage system users, oversee platform accounts, and configure external LLM API providers.</p>
+                    <h1>User Management</h1>
+                    <p class="text-muted">Manage User access and roles</p>
                 </div>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div class="alerts">
-                  {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                  {% endfor %}
-                </div>
-              {% endif %}
+            {% if messages %}
+            <div class="alerts">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% endwith %}
 
             <section id="stats-section" class="admin-metrics-grid">
@@ -67,8 +66,8 @@
             <section id="users-section" class="admin-section" style="margin-top: 24px;">
                 <div class="panel">
                     <div class="panel-header">
-                        <h2>User Account Management</h2>
-                        <p class="text-muted" style="margin-top: 4px;">Directly query, modify roles, toggle access status, and manage platform users.</p>
+                        <h2>User Accounts</h2>
+                        <p class="text-muted" style="margin-top: 4px;">Modify roles and manage platform users</p>
                     </div>
                     <div class="panel-body" style="overflow-x: auto;">
                         <table class="data-table">
@@ -89,41 +88,54 @@
                                     <td>{{ u.email }}</td>
                                     <td>
                                         {% if u.role == 'admin' %}
-                                            <span style="font-weight: 600; color: #1e293b;">Admin</span>
+                                        <span style="font-weight: 600; color: #1e293b;">Admin</span>
                                         {% else %}
-                                            <form action="{{ url_for('admin.update_user_role', user_id=u.user_id) }}" method="POST" class="inline-form">
-                                                <select name="role" class="form-select-sm" onchange="this.form.submit()">
-                                                    <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
-                                                    <option value="teacher" {% if u.role == 'teacher' %}selected{% endif %}>Teacher</option>
-                                                </select>
-                                            </form>
+                                        <form action="{{ url_for('admin.update_user_role', user_id=u.user_id) }}"
+                                            method="POST" class="inline-form">
+                                            <select name="role" class="form-select-sm" onchange="this.form.submit()">
+                                                <option value="student" {% if u.role=='student' %}selected{% endif %}>
+                                                    Student</option>
+                                                <option value="teacher" {% if u.role=='teacher' %}selected{% endif %}>
+                                                    Teacher</option>
+                                            </select>
+                                        </form>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if u.is_active == 'Active' %}
-                                            <span class="status-indicator status-active">&bull; Active</span>
+                                        {% if u.role == 'admin' %}
+                                        <span class="text-muted">&mdash;</span>
+                                        {% elif u.is_active == 'Active' %}
+                                        <span class="status-indicator status-active">Active</span>
                                         {% elif u.is_active == 'Away' %}
-                                            <span class="status-indicator status-away">&bull; Away</span>
+                                        <span class="status-indicator status-away">Away</span>
                                         {% elif u.is_active == 'Busy' %}
-                                            <span class="status-indicator status-busy">&bull; Busy</span>
+                                        <span class="status-indicator status-busy">Busy</span>
                                         {% elif u.is_active == 'Invisible' %}
-                                            <span class="status-indicator status-muted">&bull; Invisible (Privacy)</span>
+                                        <span class="status-indicator status-muted">Invisible (Privacy)</span>
                                         {% else %}
-                                            <span class="status-indicator status-inactive">&bull; Inactive</span>
+                                        <span class="status-indicator status-inactive">Inactive</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '-' }}</td>
                                     <td>
                                         <div class="actions-cell">
-                                            <form action="{{ url_for('admin.toggle_user_status', user_id=u.user_id) }}" method="POST" style="display:inline;">
-                                                <button type="submit" class="btn-action {% if u.is_active in ('Active', 'Away', 'Busy') %}btn-warn{% else %}btn-activate{% endif %}">
-                                                    {% if u.is_active in ('Active', 'Away', 'Busy') %}Set Inactive{% else %}Set Active{% endif %}
+                                            {% if u.role != 'admin' %}
+                                            <form action="{{ url_for('admin.toggle_user_status', user_id=u.user_id) }}"
+                                                method="POST" style="display:inline;">
+                                                <button type="submit"
+                                                    class="btn-action {% if u.is_active in ('Active', 'Away', 'Busy') %}btn-warn{% else %}btn-activate{% endif %}">
+                                                    {% if u.is_active in ('Active', 'Away', 'Busy') %}Set Inactive{%
+                                                    else %}Set Active{% endif %}
                                                 </button>
                                             </form>
 
-                                            <form action="{{ url_for('admin.delete_user', user_id=u.user_id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to permanently delete user {{ u.full_name }}?');">
-                                                <button type="submit" class="btn-action btn-danger">Delete</button>
-                                            </form>
+                                            <button type="button" class="btn-action btn-danger"
+                                                onclick="openDeleteModal('{{ u.user_id }}', '{{ u.full_name|escape }}', '{{ u.email|escape }}')">
+                                                Delete
+                                            </button>
+                                            {% else %}
+                                            <span style="color: #94a3b8; font-size: 12.5px; font-style: italic;">Protected</span>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -133,88 +145,59 @@
                     </div>
                 </div>
             </section>
-
-            <!-- <section id="llm-section" class="admin-section" style="margin-top: 24px;">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2>AI Layer &amp; LLM Configurations</h2>
-                        <p class="text-muted" style="margin-top: 4px;">Configure primary and fallback LLM API providers (Gemini &amp; Groq) for cost routing and persona reliability.</p>
-                    </div>
-                    <div class="panel-body">
-                        <form action="{{ url_for('admin.update_llm_config') }}" method="POST" class="admin-form">
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label for="active_provider">Primary Active Provider</label>
-                                    <select id="active_provider" name="active_provider" class="form-control">
-                                        <option value="gemini" {% if llm_config and llm_config.active_provider == 'gemini' %}selected{% endif %}>Gemini API (Google)</option>
-                                        <option value="groq" {% if llm_config and llm_config.active_provider == 'groq' %}selected{% endif %}>Groq API (High Speed)</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="fallback_provider">Secondary Fallback Provider</label>
-                                    <select id="fallback_provider" name="fallback_provider" class="form-control">
-                                        <option value="groq" {% if llm_config and llm_config.fallback_provider == 'groq' %}selected{% endif %}>Groq API</option>
-                                        <option value="gemini" {% if llm_config and llm_config.fallback_provider == 'gemini' %}selected{% endif %}>Gemini API</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group" style="margin-top: 10px;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                    <input type="checkbox" name="fallback_enabled" value="true" {% if not llm_config or llm_config.fallback_enabled %}checked{% endif %}>
-                                    <span>Enable automatic fallback routing between providers upon failure or rate limit</span>
-                                </label>
-                            </div>
-
-                            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;">
-
-                            <div class="form-row-2">
-                                <div class="provider-box">
-                                    <h3 style="font-size: 15px; margin-bottom: 12px; color: #1e293b;">Gemini API Configuration</h3>
-                                    <div class="form-group">
-                                        <label for="gemini_api_key">Gemini API Key</label>
-                                        <input type="password" id="gemini_api_key" name="gemini_api_key" class="form-control" value="{{ llm_config.gemini_api_key if llm_config else '' }}" placeholder="AIzaSy...">
-                                    </div>
-                                    <div class="form-group" style="margin-top: 10px;">
-                                        <label for="gemini_model">Gemini Model</label>
-                                        <input type="text" id="gemini_model" name="gemini_model" class="form-control" value="{{ llm_config.gemini_model if llm_config else 'gemini-1.5-flash' }}">
-                                    </div>
-                                </div>
-
-                                <div class="provider-box">
-                                    <h3 style="font-size: 15px; margin-bottom: 12px; color: #1e293b;">Groq API Configuration</h3>
-                                    <div class="form-group">
-                                        <label for="groq_api_key">Groq API Key</label>
-                                        <input type="password" id="groq_api_key" name="groq_api_key" class="form-control" value="{{ llm_config.groq_api_key if llm_config else '' }}" placeholder="gsk_...">
-                                    </div>
-                                    <div class="form-group" style="margin-top: 10px;">
-                                        <label for="groq_model">Groq Model</label>
-                                        <input type="text" id="groq_model" name="groq_model" class="form-control" value="{{ llm_config.groq_model if llm_config else 'llama-3.3-70b-versatile' }}">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-row-2" style="margin-top: 16px;">
-                                <div class="form-group">
-                                    <label for="temperature">Sampling Temperature (0.0 - 1.0)</label>
-                                    <input type="number" id="temperature" name="temperature" class="form-control" step="0.05" min="0.0" max="1.0" value="{{ llm_config.temperature if llm_config else 0.70 }}">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="max_tokens">Max Generation Tokens</label>
-                                    <input type="number" id="max_tokens" name="max_tokens" class="form-control" step="64" min="128" max="4096" value="{{ llm_config.max_tokens if llm_config else 1024 }}">
-                                </div>
-                            </div>
-
-                            <div style="margin-top: 20px;">
-                                <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 24px;">Save LLM Settings</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </section> -->
         </main>
     </div>
-</body>
-</html>
+</div>
+
+<div id="deleteUserModal" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true"
+    aria-labelledby="modalTitle">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 id="modalTitle" class="modal-title">Confirm Account Deletion</h3>
+            <button type="button" class="modal-close-btn" onclick="closeDeleteModal()"
+                aria-label="Close dialog">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to permanently delete the user account for <strong id="deleteTargetName"></strong>
+                (<span id="deleteTargetEmail"></span>)?</p>
+            <p class="modal-warning-text">This will permanently remove this user and their associated records. This
+                action cannot be reversed.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <form id="deleteUserForm" method="POST" action="" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeleteModal(userId, fullName, email) {
+        document.getElementById('deleteTargetName').textContent = fullName;
+        document.getElementById('deleteTargetEmail').textContent = email;
+        document.getElementById('deleteUserForm').action = "/admin/user/" + userId + "/delete";
+        const modal = document.getElementById('deleteUserModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('deleteUserModal');
+        modal.style.display = 'none';
+    }
+
+    // Close when clicking outside the dialog card or pressing Escape
+    window.addEventListener('click', function (event) {
+        const modal = document.getElementById('deleteUserModal');
+        if (event.target === modal) {
+            closeDeleteModal();
+        }
+    });
+
+    window.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeDeleteModal();
+        }
+    });
+</script>
+{% endblock %}
