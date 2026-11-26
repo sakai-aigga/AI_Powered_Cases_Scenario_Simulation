@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Dashboard</title>
-</head>
-<body class="dashboard-body">
+{% extends 'base.html'%}
+
+{% block head %}
+<title>Dashboard</title>
+{% endblock %}
+
+{% block body %}
+
+<div class="dashboard-body">
     <!-- Main Top Navigation -->
     <header class="navbar">
         <div class="nav-content">
@@ -30,18 +30,19 @@
             <div class="page-title-row">
                 <div>
                     <h1>Dashboard</h1>
-                    <p class="text-muted">Welcome back, {{ user.full_name or user.email }}. Here is an overview of your activity.</p>
+                    <p class="text-muted">Welcome back, {{ user.full_name or user.email }}. Here is an overview of your
+                        activity.</p>
                 </div>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div class="alerts">
-                  {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                  {% endfor %}
-                </div>
-              {% endif %}
+            {% if messages %}
+            <div class="alerts">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% endwith %}
 
             {% if user.role == 'teacher' %}
@@ -52,7 +53,8 @@
                         <h2>Case Scenarios</h2>
                     </div>
                     <div class="panel-body">
-                        <p>Create and edit roleplay case scenarios, configure milestone states, and define evaluation rubrics.</p>
+                        <p>Create and edit roleplay case scenarios, configure milestone states, and define evaluation
+                            rubrics.</p>
                         <div class="button-group">
                             <a href="{{ url_for('auth.dashboard') }}" class="btn btn-primary">New Scenario</a>
                             <a href="{{ url_for('auth.dashboard') }}" class="btn btn-secondary">Manage Scenarios</a>
@@ -81,7 +83,8 @@
                         <h2>Active Simulations</h2>
                     </div>
                     <div class="panel-body">
-                        <p>Engage in realistic case studies, make strategic choices, and navigate challenging scenarios.</p>
+                        <p>Engage in realistic case studies, make strategic choices, and navigate challenging scenarios.
+                        </p>
                         <div class="button-group">
                             <a href="{{ url_for('auth.dashboard') }}" class="btn btn-primary">Start Simulation</a>
                         </div>
@@ -103,5 +106,5 @@
             {% endif %}
         </main>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,17 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Profile Settings</title>
-</head>
-<body class="dashboard-body">
+{%extends 'base.html'%}
+
+{%block head%}
+<title>Profile</title>
+{%endblock%}
+
+
+{%block body%}
+
+<div class="dashboard-body">
     <!-- Main Top Navigation -->
     <header class="navbar">
         <div class="nav-content">
             <div class="brand">
-                <a href="{{ url_for('admin.dashboard') if user.role == 'admin' else url_for('auth.dashboard') }}">Case Simulation Platform</a>
+                <a href="{{ url_for('admin.dashboard') if user.role == 'admin' else url_for('auth.dashboard') }}">Case
+                    Simulation Platform</a>
                 <span class="brand-divider">/</span>
                 <span class="brand-context">Profile</span>
             </div>
@@ -32,18 +34,19 @@
             <div class="page-title-row">
                 <div>
                     <h1>Profile &amp; Account Settings</h1>
-                    <p class="text-muted">Manage your personal details, assigned email address, and account password.</p>
+                    <p class="text-muted">Manage your personal details, assigned email address, and account password.
+                    </p>
                 </div>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <div class="alerts">
-                  {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                  {% endfor %}
-                </div>
-              {% endif %}
+            {% if messages %}
+            <div class="alerts">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% endwith %}
 
             <div class="dashboard-grid">
@@ -51,18 +54,22 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h2>Personal Information</h2>
-                        <p class="text-muted" style="margin-top: 4px;">Update your displayed name and assigned email address.</p>
+                        <p class="text-muted" style="margin-top: 4px;">Update your displayed name and assigned email
+                            address.</p>
                     </div>
                     <div class="panel-body">
-                        <form action="{{ url_for('auth.update_profile_info') }}" method="POST" class="auth-form" style="margin-top: 8px;">
+                        <form action="{{ url_for('auth.update_profile_info') }}" method="POST" class="auth-form"
+                            style="margin-top: 8px;">
                             <div class="form-group">
                                 <label for="full_name">Full Name</label>
-                                <input type="text" id="full_name" name="full_name" value="{{ user.full_name }}" maxlength="120" required autocomplete="name">
+                                <input type="text" id="full_name" name="full_name" value="{{ user.full_name }}"
+                                    maxlength="120" required autocomplete="name">
                             </div>
 
                             <div class="form-group">
                                 <label for="email">Assigned Email Address</label>
-                                <input type="email" id="email" name="email" value="{{ user.email }}" maxlength="150" required autocomplete="email">
+                                <input type="email" id="email" name="email" value="{{ user.email }}" maxlength="150"
+                                    required autocomplete="email">
                             </div>
 
                             <div class="form-row-2" style="margin-top: 4px;">
@@ -81,7 +88,8 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 20px; margin-top: 12px;">Save Profile Changes</button>
+                            <button type="submit" class="btn btn-primary"
+                                style="width: auto; padding: 10px 20px; margin-top: 12px;">Save Profile Changes</button>
                         </form>
                     </div>
                 </div>
@@ -90,48 +98,64 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h2>Change Password</h2>
-                        <p class="text-muted" style="margin-top: 4px;">Ensure your account is protected with a secure password.</p>
+                        <p class="text-muted" style="margin-top: 4px;">Ensure your account is protected with a secure
+                            password.</p>
                     </div>
                     <div class="panel-body">
-                        <form action="{{ url_for('auth.change_password') }}" method="POST" class="auth-form" style="margin-top: 8px;">
+                        <form action="{{ url_for('auth.change_password') }}" method="POST" class="auth-form"
+                            style="margin-top: 8px;">
                             <div class="form-group">
                                 <label for="current_password">Current Password</label>
-                                <input type="password" id="current_password" name="current_password" placeholder="Enter current password" required autocomplete="current-password">
+                                <input type="password" id="current_password" name="current_password"
+                                    placeholder="Enter current password" required autocomplete="current-password">
                             </div>
 
                             <div class="form-group">
                                 <label for="new_password">New Password</label>
-                                <input type="password" id="new_password" name="new_password" placeholder="Minimum 6 characters" minlength="6" required autocomplete="new-password">
+                                <input type="password" id="new_password" name="new_password"
+                                    placeholder="Minimum 6 characters" minlength="6" required
+                                    autocomplete="new-password">
                             </div>
 
                             <div class="form-group">
                                 <label for="confirm_password">Confirm New Password</label>
-                                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter new password" minlength="6" required autocomplete="new-password">
+                                <input type="password" id="confirm_password" name="confirm_password"
+                                    placeholder="Re-enter new password" minlength="6" required
+                                    autocomplete="new-password">
                             </div>
 
-                            <button type="submit" class="btn btn-secondary" style="width: auto; padding: 10px 20px; margin-top: 12px;">Update Password</button>
+                            <button type="submit" class="btn btn-secondary"
+                                style="width: auto; padding: 10px 20px; margin-top: 12px;">Update Password</button>
                         </form>
                     </div>
                 </div>
             </div>
 
+            {% if user.role != 'admin' %}
             <!-- Panel 3: Activity & Privacy Status -->
             <div class="panel" style="margin-top: 20px;">
                 <div class="panel-header">
                     <h2>Activity &amp; Privacy Status</h2>
-                    <p class="text-muted" style="margin-top: 4px;">Update how your activity is tracked across the platform and manage your privacy mode.</p>
+                    <p class="text-muted" style="margin-top: 4px;">Update how your activity is tracked across the
+                        platform and manage your privacy mode.</p>
                 </div>
                 <div class="panel-body">
-                    <form action="{{ url_for('auth.update_status') }}" method="POST" class="auth-form" style="margin-top: 8px;">
+                    <form action="{{ url_for('auth.update_status') }}" method="POST" class="auth-form"
+                        style="margin-top: 8px;">
                         <div class="form-row-2">
                             <div class="form-group">
                                 <label for="status">Presence &amp; Privacy Mode</label>
                                 <select id="status" name="status" class="form-control">
-                                    <option value="Active" {% if user.is_active == 'Active' %}selected{% endif %}>Active (Online &amp; Available)</option>
-                                    <option value="Away" {% if user.is_active == 'Away' %}selected{% endif %}>Away</option>
-                                    <option value="Busy" {% if user.is_active == 'Busy' %}selected{% endif %}>Busy (Do Not Disturb)</option>
-                                    <option value="Invisible" {% if user.is_active == 'Invisible' %}selected{% endif %}>Invisible (Privacy Mode &mdash; Appear Offline)</option>
-                                    <option value="Inactive" {% if user.is_active == 'Inactive' %}selected{% endif %}>Inactive (Offline)</option>
+                                    <option value="Active" {% if user.is_active=='Active' %}selected{% endif %}>Active
+                                        (Online &amp; Available)</option>
+                                    <option value="Away" {% if user.is_active=='Away' %}selected{% endif %}>Away
+                                    </option>
+                                    <option value="Busy" {% if user.is_active=='Busy' %}selected{% endif %}>Busy (Do Not
+                                        Disturb)</option>
+                                    <option value="Invisible" {% if user.is_active=='Invisible' %}selected{% endif %}>
+                                        Invisible (Privacy Mode &mdash; Appear Offline)</option>
+                                    <option value="Inactive" {% if user.is_active=='Inactive' %}selected{% endif %}>
+                                        Inactive (Offline)</option>
                                 </select>
                             </div>
 
@@ -139,25 +163,27 @@
                                 <label>Current Mode</label>
                                 <div style="padding: 8px 0;">
                                     {% if user.is_active == 'Active' %}
-                                        <span class="status-indicator status-active">&bull; Active (Online)</span>
+                                    <span class="status-indicator status-active">&bull; Active (Online)</span>
                                     {% elif user.is_active == 'Away' %}
-                                        <span class="status-indicator status-away">&bull; Away</span>
+                                    <span class="status-indicator status-away">&bull; Away</span>
                                     {% elif user.is_active == 'Busy' %}
-                                        <span class="status-indicator status-busy">&bull; Busy</span>
+                                    <span class="status-indicator status-busy">&bull; Busy</span>
                                     {% elif user.is_active == 'Invisible' %}
-                                        <span class="status-indicator status-muted">&bull; Invisible (Privacy)</span>
+                                    <span class="status-indicator status-muted">&bull; Invisible (Privacy)</span>
                                     {% else %}
-                                        <span class="status-indicator status-inactive">&bull; Inactive (Offline)</span>
+                                    <span class="status-indicator status-inactive">&bull; Inactive (Offline)</span>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary" style="width: auto; padding: 10px 20px; margin-top: 12px;">Save Status</button>
+                        <button type="submit" class="btn btn-primary"
+                            style="width: auto; padding: 10px 20px; margin-top: 12px;">Save Status</button>
                     </form>
                 </div>
             </div>
+            {% endif %}
         </main>
     </div>
-</body>
-</html>
+</div>
+{%endblock%}
