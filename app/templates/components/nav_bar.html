@@ -1,43 +1,66 @@
 <aside class="sidebar-nav">
-    <div class="sidebar-user-block">
-        <div class="sidebar-name">{{ user.full_name or user.email }}</div>
-        <div class="sidebar-role">{{ user.role|capitalize }}</div>
-        <div class="sidebar-status-indicator">
-            {% if user.is_active == 'Active' %}
-                <span class="status-indicator status-active">&bull; Active</span>
-            {% elif user.is_active == 'Away' %}
-                <span class="status-indicator status-away">&bull; Away</span>
-            {% elif user.is_active == 'Busy' %}
-                <span class="status-indicator status-busy">&bull; Busy</span>
-            {% elif user.is_active == 'Invisible' %}
-                <span class="status-indicator status-muted">&bull; Invisible</span>
-            {% else %}
-                <span class="status-indicator status-inactive">&bull; Inactive</span>
+    <div class="sidebar-header-row">
+        <div class="sidebar-user-block">
+            <div class="sidebar-name">{{ user.full_name or user.email }}</div>
+            <div class="sidebar-role">{{ user.role|capitalize }}</div>
+            {% if user.role != 'admin' %}
+            <div class="sidebar-status-indicator">
+                {% if user.is_active == 'Active' %}
+                <span class="status-indicator status-active">Active</span>
+                {% elif user.is_active == 'Away' %}
+                <span class="status-indicator status-away">Away</span>
+                {% elif user.is_active == 'Busy' %}
+                <span class="status-indicator status-busy">Busy</span>
+                {% elif user.is_active == 'Invisible' %}
+                <span class="status-indicator status-muted">Invisible</span>
+                {% else %}
+                <span class="status-indicator status-inactive">Inactive</span>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
+        <button type="button" class="sidebar-hamburger-btn" id="sidebarMenuToggle" aria-label="Toggle navigation menu"
+            onclick="toggleSidebarMenu()">
+            <span class="hamburger-icon">&#9776;</span>
+            <span class="hamburger-label">Menu</span>
+        </button>
     </div>
 
-    <nav class="sidebar-menu">
+    <nav class="sidebar-menu" id="sidebarMenu">
         {% if user.role == 'admin' %}
-            <div class="sidebar-section-title">Admin Controls</div>
-            <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">Admin Console</a>
-            <a href="{{ url_for('admin.dashboard') }}#users-section" class="sidebar-link">User Management</a>
-            <a href="{{ url_for('admin.dashboard') }}#llm-section" class="sidebar-link">LLM Configurations</a>
+        <div class="sidebar-section-title">Admin Controls</div>
+        <a href="{{ url_for('admin.dashboard') }}"
+            class="sidebar-link {% if request.endpoint in ('admin.dashboard', 'admin.users') %}active{% endif %}">User
+            Management</a>
+        <a href="{{ url_for('admin.llm_config') }}"
+            class="sidebar-link {% if request.endpoint in ('admin.llm_config', 'admin.update_llm_config') %}active{% endif %}">LLM
+            Configurations</a>
         {% else %}
-            <div class="sidebar-section-title">Navigation</div>
-            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link {% if request.endpoint == 'auth.dashboard' %}active{% endif %}">Dashboard Home</a>
+        <div class="sidebar-section-title">Navigation</div>
+        <a href="{{ url_for('auth.dashboard') }}"
+            class="sidebar-link {% if request.endpoint == 'auth.dashboard' %}active{% endif %}">Dashboard Home</a>
 
-            {% if user.role == 'teacher' %}
-                <a href="{{ url_for('auth.dashboard') }}#scenarios-section" class="sidebar-link">Case Scenarios</a>
-                <a href="{{ url_for('auth.dashboard') }}#submissions-section" class="sidebar-link">Student Submissions</a>
-            {% else %}
-                <a href="{{ url_for('auth.dashboard') }}#simulations-section" class="sidebar-link">Active Simulations</a>
-                <a href="{{ url_for('auth.dashboard') }}#history-section" class="sidebar-link">Performance History</a>
-            {% endif %}
+        {% if user.role == 'teacher' %}
+        <a href="{{ url_for('auth.dashboard') }}#scenarios-section" class="sidebar-link">Case Scenarios</a>
+        <a href="{{ url_for('auth.dashboard') }}#submissions-section" class="sidebar-link">Student Submissions</a>
+        {% else %}
+        <a href="{{ url_for('auth.dashboard') }}#simulations-section" class="sidebar-link">Active Simulations</a>
+        <a href="{{ url_for('auth.dashboard') }}#history-section" class="sidebar-link">Performance History</a>
+        {% endif %}
         {% endif %}
 
         <div class="sidebar-section-title" style="margin-top: 18px;">Account</div>
-        <a href="{{ url_for('auth.profile') }}" class="sidebar-link {% if request.endpoint == 'auth.profile' %}active{% endif %}">Profile Settings</a>
+        <a href="{{ url_for('auth.profile') }}"
+            class="sidebar-link {% if request.endpoint == 'auth.profile' %}active{% endif %}">Profile Settings</a>
         <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">Sign Out</a>
     </nav>
 </aside>
+
+<script>
+    function toggleSidebarMenu() {
+        const menu = document.getElementById('sidebarMenu');
+        if (menu) {
+            menu.classList.toggle('menu-open');
+        }
+    }
+</script>
